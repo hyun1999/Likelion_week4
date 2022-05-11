@@ -1,0 +1,20 @@
+{
+  "repository": "https://github.com/hyun1999/Likelion_week4.git",
+  "author": "hyun1999 <dazzle1999@naver.com>",
+  "name": "node_4th_express",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "dev": "nodemon after/index.js --exec babel-node"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.17.10",
+    "@babel/node": "^7.17.10",
+    "@babel/preset-env": "^7.17.10",
+    "nodemon": "^2.0.16"
+  },
+  "dependencies": {
+    "express": "^4.18.1"
+  }
+}
