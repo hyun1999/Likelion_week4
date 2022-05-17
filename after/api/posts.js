@@ -8,17 +8,17 @@ let books = [ // book 배열
   { // book [0]
     id: 1,
     content: "자전거 도둑",
-    writer: "박완서",
+    writer: 1,
   },
   { // book [1]
     id: 2,
     content: "소나기",
-    writer: "황순원",
+    writer: 2,
   },
   { // book [2]
     id: 3,
     content: "마당을 나온 암탉",
-    writer: "황선미"
+    writer: 3
   },
 ];
 //실행 주소 http://localhost:3000/api/posts 
@@ -54,7 +54,7 @@ routerPosts.put('/', (req, res) => {
 //------------------게시글 삭제---------------------
 
 routerPosts.delete('/', (req, res) => {
-  books = books.filter(book => book.id !== req.body.userId);
+  books = books.filter(book => book.writer !== req.body.userId);
   res.json(books);
 });
 

@@ -6,17 +6,17 @@ let books = [ // book 배열
   { // books [0]
     id: 1,
     content: "자전거 도둑",
-    writer: "박완서",
+    writer: 1,
   },
   { // books [1]
     id: 2,
     content: "소나기",
-    writer: "황순원",
+    writer: 2,
   },
   { // books [2]
     id: 3,
     content: "마당을 나온 암탉",
-    writer: "황선미"
+    writer: 3
   },
 ];
 
