@@ -2,71 +2,60 @@ import { Router } from "express";
 
 const routerPosts = Router();
 
-let nextId = 4; // students 변수에 id를 설정합니다
+let nextId = 4; // book 변수에 id를 설정합니다
 
-let students = [ // students 배열
-  { // students[0]
+let books = [ // book 배열
+  { // book [0]
     id: 1,
-    name: 'Ronaldo',
-    major:'computer engineering',
+    content: "자전거 도둑",
+    writer: "박완서",
   },
-  { // students [1]
+  { // book [1]
     id: 2,
-    name: 'Messi',
-    major: 'chemical engineering',
+    content: "소나기",
+    writer: "황순원",
   },
-  { // students [2]
+  { // book [2]
     id: 3,
-    name: 'Henry',
-    major: 'physics'
+    content: "마당을 나온 암탉",
+    writer: "황선미"
   },
 ];
 //실행 주소 http://localhost:3000/api/posts 
 //----------------------글 목록 조회----------------------
 routerPosts.get('/', (req, res) => {
 
-  return res.status(200).json(students);
+  return res.json(books);
 
 });
 //-------------------------글 생성------------------------
 routerPosts.post('/', (req, res) => { 
-  students.push({
+  books.push({
     id: nextId++,
-    name: req.body.name,
-    major: req.body.major,
+    content: req.body.content,
+    writer: req.body.writer,
   });
-  res.json(students);
+  res.json(books);
 });
 //--------------------특정 글 수정-------------------------
 routerPosts.put('/', (req, res) => {
-  const index = students.findIndex(students => students.id === req.body.postId);
-  const postId = req.body.postId;
-  const userId = req.body.userId;
-  if (userId===postId) { // userId와 postId가 같을 경우
-    students[index] = {
-        id: req.body.postId,
-        content: req.body.content
-    };
-    }
-  else{
-    return res.json({ // userId와 postId가 다를 경우
-      error: "userId와 postId가 일치하지 않습니다.",
-  });
+  const index = books.findIndex(book => book.id === req.body.postId);
+  if (index === -1) { // 해당 책이 없을시
+    return res.json({
+      error: "That book does not exist",
+    });
   }
-  res.json(students);
+
+  books[index] = {
+    id: req.body.postId,
+  };
+  res.json(books[index]);
 });
 //------------------게시글 삭제---------------------
 
 routerPosts.delete('/', (req, res) => {
-  const postId = req.body.postId;
-  const userId = req.body.userId;
-  if(postId === userId){
-    students = students.filter(students => students.id !== req.body.postId);
-    res.json("Successfully deleted")
-  }
-  else{
-    return res.json("Cannot delete post")
-  }
+  books = books.filter(book => book.id !== req.body.userId);
+  res.json(books);
 });
 
 export default routerPosts;
