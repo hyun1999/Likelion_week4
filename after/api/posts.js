@@ -22,40 +22,69 @@ let books = [ // book 배열
   },
 ];
 //실행 주소 http://localhost:3000/api/posts 
+
 //----------------------글 목록 조회----------------------
 routerPosts.get('/', (req, res) => {
 
   return res.json(books);
 
 });
-//-------------------------글 생성------------------------
-routerPosts.post('/', (req, res) => { 
-  books.push({
-    id: nextId++,
-    content: req.body.content,
-    writer: req.body.writer,
-  });
-  res.json(books);
-});
-//--------------------특정 글 수정-------------------------
-routerPosts.put('/', (req, res) => {
-  const index = books.findIndex(book => book.id === req.body.postId);
-  if (index === -1) { // 해당 책이 없을시
+//----------------------글 개별 항목 조회-----------------
+routerPosts.get('/:postId', (req, res) => {  
+  const index = books.findIndex(book => book.id === parseInt(req.params.postId));
+  if (index === -1) {
     return res.json({
       error: "That book does not exist",
     });
   }
-
-  books[index] = {
-    id: req.body.postId,
-  };
   res.json(books[index]);
+});
+//-------------------------글 생성------------------------
+routerPosts.post('/', (req, res) => { 
+  let userId = req.header('X-User-Id');
+  if(userId === "1"){
+    books.push({
+      id: nextId++,
+      content: req.body.content,
+      writer: req.body.writer,
+    });
+  }
+  res.json({id:nextId-1});
+  
+});
+//--------------------특정 글 수정-------------------------
+routerPosts.put('/:postId', (req, res) => {
+  let userId = parseInt(req.header('X-User-Id'));
+  let postId = parseInt(req.params.postId);
+  if(userId ===1){
+    const index = books.findIndex(book => book.id === userId);
+    if (index === -1) {
+      return res.json({
+        error: "Cannot modify post",
+      });
+    }
+    books[index] = {
+      content: req.body.content,
+      id: postId
+    };
+    res.json(
+      {id:books[index].id}
+  );
+  }
 });
 //------------------게시글 삭제---------------------
 
-routerPosts.delete('/', (req, res) => {
-  books = books.filter(book => book.writer !== req.body.userId);
-  res.json(books);
+routerPosts.delete('/:postId', (req, res) => {
+  let userId = parseInt(req.header('X-User-Id'));
+  let postId = parseInt(req.params.postId);
+  if(userId === 1){
+  books = books.filter(book => book.writer !== postId);
+  res.json({data:"Successfully deleted"});
+  }else{
+    res.json({
+      error:"Cannot delete post"
+    })
+  }
 });
 
 export default routerPosts;
