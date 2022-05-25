@@ -1,86 +1,83 @@
 import { Router } from "express";
+import posts from '../../models/posts';
 
 const routerPosts = Router();
 
-let nextId = 4; // book 변수에 id를 설정합니다
-
-let books = [ // book 배열
-  { // book [0]
-    id: 1,
-    content: "자전거 도둑",
-    writer: 1,
-  },
-  { // book [1]
-    id: 2,
-    content: "소나기",
-    writer: 2,
-  },
-  { // book [2]
-    id: 3,
-    content: "마당을 나온 암탉",
-    writer: 3
-  },
-];
 //실행 주소 http://localhost:3000/api/posts 
 
 //----------------------글 목록 조회----------------------
-routerPosts.get('/', (req, res) => {
-
-  return res.json(books);
-
+routerPosts.get('/', async (req, res) => {
+	const postDatas = await posts.findAll({});
+  res.json({
+		data: postDatas
+	});
 });
 //----------------------글 개별 항목 조회-----------------
-routerPosts.get('/:postId', (req, res) => {  
-  const index = books.findIndex(book => book.id === parseInt(req.params.postId));
-  if (index === -1) {
+routerPosts.get('/:postId', async (req, res) => {  
+  //const index = books.findIndex(book => book.id === parseInt(req.params.postId));
+  const PostId = parseInt(req.params.postId);
+  const postDatas = await posts.findAll({where: {id: PostId}});
+  if (postDatas == "") {
     return res.json({
       error: "That book does not exist",
     });
   }
-  res.json(books[index]);
+  res.json(postDatas);
 });
 //-------------------------글 생성------------------------
-routerPosts.post('/', (req, res) => { 
+routerPosts.post('/', async (req, res) => { 
   let userId = req.header('X-User-Id');
+  const { content } = req.body;
   if(userId === "1"){
-    books.push({
-      id: nextId++,
-      content: req.body.content,
-      writer: req.body.writer,
+     await posts.create({
+      content: content,
+      writer: userId,
     });
   }
-  res.json({id:nextId-1});
-  
+	const postDatas = await posts.findOne({
+    attributes:["id"],
+    where:{
+      content:content,
+    }
+  });
+  res.json({
+		data: postDatas
+	});
 });
 //--------------------특정 글 수정-------------------------
-routerPosts.put('/:postId', (req, res) => {
-  let userId = parseInt(req.header('X-User-Id'));
-  let postId = parseInt(req.params.postId);
-  if(userId ===1){
-    const index = books.findIndex(book => book.id === userId);
-    if (index === -1) {
+routerPosts.put('/:postId', async(req, res) => {
+  const userId = req.header('X-User-Id');
+  const { postId } = req.params;
+  const { content } = req.body;
+  if(await posts.findOne({attributes:["writer"],where:{writer:userId,}})){ 
+    await posts.update({content :content},{where:{id:postId}});
+    res.json(
+      {data:postId}
+    );
+    }
+  else{
       return res.json({
         error: "Cannot modify post",
       });
-    }
-    books[index] = {
-      content: req.body.content,
-      id: postId
-    };
-    res.json(
-      {id:books[index].id}
-  );
   }
 });
 //------------------게시글 삭제---------------------
-
-routerPosts.delete('/:postId', (req, res) => {
-  let userId = parseInt(req.header('X-User-Id'));
-  let postId = parseInt(req.params.postId);
-  if(userId === 1){
-  books = books.filter(book => book.writer !== postId);
-  res.json({data:"Successfully deleted"});
-  }else{
+routerPosts.delete('/:postId', async (req, res) => {
+  let userId = req.header('X-User-Id');
+  let { postId } = req.params;
+  console.log(userId);
+  if(await posts.findOne({attributes:["writer"],where:{writer:userId,}}))
+  {
+    await posts.destroy({
+      where :{
+        id :postId,
+      }
+    });
+    res.json({
+      data:"Successfully deleted"
+    })
+  }
+  else{
     res.json({
       error:"Cannot delete post"
     })
