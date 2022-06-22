@@ -26,6 +26,7 @@ routerPosts.get('/:postId', async (req, res) => {
 });
 //-------------------------글 생성------------------------
 routerPosts.post('/',verifyToken, async (req, res) => { 
+  res.header("Access-Control-Allow-Origin", "http://localhost:3001/api/posts");
   const { content, writer } = req.body;
     await posts.create({
       content: content,
