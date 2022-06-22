@@ -1,11 +1,18 @@
 import express from "express";
-
 import api from "./api";
+import cors from "cors";
 
 const app = express();
 const port = 3000;
 
 const { sequelize } = require("../models");
+
+const corsOptions = {
+  origin : "http://localhost:3001/api/posts"
+}
+
+app.use(cors(corsOptions))
+
 
 sequelize
   .sync({ force: false }) 

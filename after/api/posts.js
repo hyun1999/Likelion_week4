@@ -1,6 +1,6 @@
 import { Router } from "express";
 import posts from '../../models/posts';
-
+const { verifyToken } = require("../../routes/middlewares");
 const routerPosts = Router();
 
 //실행 주소 http://localhost:3000/api/posts 
@@ -25,15 +25,13 @@ routerPosts.get('/:postId', async (req, res) => {
   res.json(postDatas);
 });
 //-------------------------글 생성------------------------
-routerPosts.post('/', async (req, res) => { 
-  let userId = req.header('X-User-Id');
-  const { content } = req.body;
-  if(userId === "1"){
-     await posts.create({
+routerPosts.post('/',verifyToken, async (req, res) => { 
+  res.header("Access-Control-Allow-Origin", "http://localhost:3001/api/posts");
+  const { content, writer } = req.body;
+    await posts.create({
       content: content,
-      writer: userId,
+      writer: writer,
     });
-  }
 	const postDatas = await posts.findOne({
     attributes:["id"],
     where:{
@@ -45,11 +43,10 @@ routerPosts.post('/', async (req, res) => {
 	});
 });
 //--------------------특정 글 수정-------------------------
-routerPosts.put('/:postId', async(req, res) => {
-  const userId = req.header('X-User-Id');
+routerPosts.put('/:postId',verifyToken, async(req, res) => {
   const { postId } = req.params;
-  const { content } = req.body;
-  if(await posts.findOne({attributes:["writer"],where:{writer:userId,}})){ 
+  const { writer,content } = req.body;
+  if(await posts.findOne({attributes:["writer"],where:{writer:writer,}})){ 
     await posts.update({content :content},{where:{id:postId}});
     res.json(
       {data:postId}
@@ -62,15 +59,13 @@ routerPosts.put('/:postId', async(req, res) => {
   }
 });
 //------------------게시글 삭제---------------------
-routerPosts.delete('/:postId', async (req, res) => {
-  let userId = req.header('X-User-Id');
-  let { postId } = req.params;
-  console.log(userId);
-  if(await posts.findOne({attributes:["writer"],where:{writer:userId,}}))
+routerPosts.delete('/:postId',verifyToken, async (req, res) => {
+  const { postId } = req.params;
+  if(await posts.findOne({attributes:["writer"],where:{writer:postId,}}))
   {
     await posts.destroy({
       where :{
-        id :postId,
+        writer :postId,
       }
     });
     res.json({
